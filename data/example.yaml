@@ -1,0 +1,29 @@
+---
+
+collect:
+  format: prometheus
+  endpoint: http://127.0.0.1:9100/metrics
+
+groups: 
+  kafka_offset:
+    name: "Kafka Partition Offsets"
+    range: [0, 100]
+    metrics:
+      - name: "Offset"
+        selector: "~kafka.offset.*{}"
+        aggregate: [ "sum:topic", "mean" ]  #sum by topic, then global mean
+        transform: [ "rate", "mul:8" ]
+        display: [ "stacked" ]
+
+  kafka_bytes:
+    name: "Kafka Bandwidth"
+    axis_range:
+      y1: [0, 102400]
+      y2: [0, 102400]
+    metrics:
+      - name: "Bytes In"
+        selector: "kafka.BytesInPerSec{}"
+        aggregate: [ "sum" ] 
+        #transform: [ "div:1M" ]
+        transform: [ "div:1024" ]
+        axis: "y1"
