@@ -5,7 +5,7 @@ extern crate serde_yaml;
 extern crate toml;
 
 use serde::{Deserialize, Serialize, Serializer};
-use serde::ser::{SerializeSeq};
+use serde::ser::SerializeSeq;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
@@ -55,7 +55,6 @@ impl Serialize for Range {
     }
 }
 
-
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Axis {
@@ -93,10 +92,22 @@ fn parse_aggregate_str(s: &str) -> Result<Aggregate, Box<Error>> {
 
 #[test]
 fn parse_aggregate_str_test() {
-    assert_eq!(parse_aggregate_str("sum").unwrap(), Aggregate(AggOp::Sum, None));
-    assert_eq!(parse_aggregate_str("mean").unwrap(), Aggregate(AggOp::Mean, None));
-    assert_eq!(parse_aggregate_str("sum:broker").unwrap(), Aggregate(AggOp::Sum, Some("broker".into())));
-    assert_eq!(parse_aggregate_str("mean:broker").unwrap(), Aggregate(AggOp::Mean, Some("broker".into())));
+    assert_eq!(
+        parse_aggregate_str("sum").unwrap(),
+        Aggregate(AggOp::Sum, None)
+    );
+    assert_eq!(
+        parse_aggregate_str("mean").unwrap(),
+        Aggregate(AggOp::Mean, None)
+    );
+    assert_eq!(
+        parse_aggregate_str("sum:broker").unwrap(),
+        Aggregate(AggOp::Sum, Some("broker".into()))
+    );
+    assert_eq!(
+        parse_aggregate_str("mean:broker").unwrap(),
+        Aggregate(AggOp::Mean, Some("broker".into()))
+    );
 }
 
 impl<'de> Deserialize<'de> for Aggregate {
@@ -135,7 +146,7 @@ impl Serialize for Aggregate {
     }
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum Transform {
     Rate,
     Mul(i32),
@@ -149,8 +160,8 @@ fn parse_next_int(os: Option<&str>) -> Result<i32, Box<Error>> {
         Some(s) => {
             let n: i32 = FromStr::from_str(s)?;
             Ok(n)
-        },
-        None => Err("Missing parameter".into())
+        }
+        None => Err("Missing parameter".into()),
     }
 }
 

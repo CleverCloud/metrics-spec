@@ -8,8 +8,6 @@ use std::io::{self, Read};
 
 use metrics_lib::*;
 
-
-
 fn main() {
     let mut buffer = String::new();
     io::stdin().read_to_string(&mut buffer).unwrap();
@@ -18,12 +16,12 @@ fn main() {
     println!("{:?}", &c);
 
     let metric = Metric {
-        name:     "test".into(),
-        selector: "test".into(),
-        axis:     Some(Axis::Y1),
+        name:      "test".into(),
+        selector:  "test".into(),
+        axis:      Some(Axis::Y1),
         aggregate: Some(vec![Aggregate(AggOp::Mean, None)]),
         transform: Some(vec![Transform::Sub(20)]),
-        display: Some(vec![Display::Stacked]),
+        display:   Some(vec![Display::Stacked]),
     };
     let group = Group {
         name:       "group_name".into(),
@@ -34,7 +32,7 @@ fn main() {
 
     let metrics = Metrics {
         collect: Collector::Prometheus {
-            endpoint: "http://localhost:9200".into()
+            endpoint: "http://localhost:9200".into(),
         },
         groups:  hashmap!(
             "group1".into() => group
