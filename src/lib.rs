@@ -218,19 +218,19 @@ impl Serialize for Transform {
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Display {
-    Stack,
-    Invert,
-    Percent,
+    Stacked,
+    Inverted,
+    Percentage,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Metric {
     pub name:      String,
     pub selector:  String,
-    pub aggregate: Vec<Aggregate>,
-    pub transform: Vec<Transform>,
-    pub display:   Vec<Display>,
-    pub axis:      Axis,
+    pub aggregate: Option<Vec<Aggregate>>,
+    pub transform: Option<Vec<Transform>>,
+    pub display:   Option<Vec<Display>>,
+    pub axis:      Option<Axis>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

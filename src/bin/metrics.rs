@@ -17,22 +17,18 @@ fn main() {
     let c = parse_yaml(&buffer);
     println!("{:?}", &c);
 
-
-
-
     let metric = Metric {
         name:     "test".into(),
         selector: "test".into(),
-        axis:     Axis::Y1,
-        aggregate: vec![Aggregate(AggOp::Mean, None)],
-        //transform: vec![Transform::Sub(20)],
-        transform: vec![],
-        display:   vec![Display::Stack],
+        axis:     Some(Axis::Y1),
+        aggregate: Some(vec![Aggregate(AggOp::Mean, None)]),
+        transform: Some(vec![Transform::Sub(20)]),
+        display: Some(vec![Display::Stacked]),
     };
     let group = Group {
         name:       "group_name".into(),
         metrics:    vec![metric],
-        range:      None, //Some(Range(0, 100)),
+        range:      Some(Range(0, 100)),
         axis_range: None,
     };
 
