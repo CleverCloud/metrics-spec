@@ -7,6 +7,7 @@ extern crate toml;
 use std::collections::HashMap;
 use std::error::Error;
 
+// ToDo not supported
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Range(pub i32, pub i32);
 #[derive(Debug, Deserialize, Serialize)]
@@ -14,6 +15,7 @@ pub enum Axis {
     Y1,
     Y2,
 }
+// ToDo not supported
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AxisRange(pub Range, pub Range);
 
@@ -23,6 +25,7 @@ pub enum AggOp {
     Mean,
 }
 
+// ToDo not supported
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Aggregate(pub AggOp, pub Option<String>);
 
@@ -59,6 +62,8 @@ pub struct Group {
     pub axis_range: Option<AxisRange>,
     pub metrics:    Vec<Metric>,
 }
+
+// ToDo not supported
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Collector {
     Prometheus(String),
