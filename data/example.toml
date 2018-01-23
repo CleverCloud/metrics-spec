@@ -5,8 +5,8 @@ endpoint = "http://127.0.0.1:9100/metrics"
 name = "Kafka Bandwidth"
 
 [groups.kafka_bytes.axis_range]
-y1 = [0, 102400]
-y2 = [0, 102400]
+y1 = ["0", "100M"]
+y2 = ["0", "100M"]
 
 [[groups.kafka_bytes.metrics]]
 name = "Bytes In"
@@ -17,7 +17,7 @@ axis = "y1"
 
 [groups.kafka_offset]
 name = "Kafka Partition Offsets"
-range = [0, 100]
+range = ["0", "100"]
 
 [[groups.kafka_offset.metrics]]
 name = "Offset"

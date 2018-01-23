@@ -32,10 +32,12 @@ impl<'de> Deserialize<'de> for Range {
             where
                 A: serde::de::SeqAccess<'de>,
             {
-                let lo = sa.next_element()?;
-                let hi = sa.next_element()?;
+                let lo: Option<String> = sa.next_element()?;
+                let hi: Option<String> = sa.next_element()?;
                 if let (Some(l), Some(h)) = (lo, hi) {
-                    Ok(Range(l, h))
+                    let lo_p = parse_with_unit(&l).map_err(|e| serde::de::Error::custom(e))?;
+                    let hi_p = parse_with_unit(&h).map_err(|e| serde::de::Error::custom(e))?;
+                    Ok(Range(lo_p, hi_p))
                 } else {
                     Err(serde::de::Error::custom("Expected a range like [0, 100]"))
                 }
@@ -51,8 +53,8 @@ impl Serialize for Range {
         S: Serializer,
     {
         let mut seq = serializer.serialize_seq(Some(2))?;
-        seq.serialize_element(&self.0)?;
-        seq.serialize_element(&self.1)?;
+        seq.serialize_element(&format!("{}", self.0))?;
+        seq.serialize_element(&format!("{}", self.1))?;
         seq.end()
     }
 }

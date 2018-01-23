@@ -7,7 +7,7 @@ collect:
 groups: 
   kafka_offset:
     name: "Kafka Partition Offsets"
-    range: [0, 100]
+    range: [0, "100M"]
     metrics:
       - name: "Offset"
         selector: "~kafka.offset.*{}"
@@ -18,8 +18,8 @@ groups:
   kafka_bytes:
     name: "Kafka Bandwidth"
     axis_range:
-      y1: [0, 102400]
-      y2: [0, 102400]
+      y1: [0, "100M"]
+      y2: [0, "100M"]
     metrics:
       - name: "Bytes In"
         selector: "kafka.BytesInPerSec{}"
