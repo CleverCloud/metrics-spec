@@ -1,9 +1,11 @@
+extern crate regex;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde_yaml;
 extern crate toml;
 
+use regex::Regex;
 use serde::{Deserialize, Serialize, Serializer};
 use serde::ser::SerializeSeq;
 use std::collections::HashMap;
@@ -155,6 +157,50 @@ pub enum Transform {
     Sub(i64),
 }
 
+fn parse_with_unit(s: &str) -> Result<i64, Box<Error>> {
+    let re = Regex::new(r"^(-?\d+)([KMGT]?)$")?;
+    let result: Result<regex::Captures, Box<Error>> = re.captures(s).ok_or("Missing number".into());
+    let captures = result?;
+    let number_str = &captures.get(1).unwrap();
+    let unit_str = &captures.get(2);
+
+    let number: i64 = FromStr::from_str(number_str.as_str())?;
+    let unit_mul: i64 = match unit_str.map(|e| e.as_str()) {
+        Some("K") => 1024,
+        Some("M") => 1024_i64 * 1024,
+        Some("G") => 1024_i64 * 1024 * 1024,
+        Some("T") => 1024_i64 * 1024 * 1024 * 1024,
+        Some("") | None => 1,
+        Some(_) => unimplemented!(),
+    };
+
+    Ok(number * unit_mul)
+}
+
+#[test]
+fn test_parse_with_unit() {
+    assert_eq!(parse_with_unit("10").unwrap(), 10);
+    assert_eq!(parse_with_unit("10K").unwrap(), 10_i64 * 1024);
+    assert_eq!(parse_with_unit("10M").unwrap(), 10_i64 * 1024 * 1024);
+    assert_eq!(parse_with_unit("10G").unwrap(), 10_i64 * 1024 * 1024 * 1024);
+    assert_eq!(
+        parse_with_unit("10T").unwrap(),
+        10_i64 * 1024 * 1024 * 1024 * 1024
+    );
+
+    assert_eq!(parse_with_unit("-10").unwrap(), -10);
+    assert_eq!(parse_with_unit("-10K").unwrap(), -10_i64 * 1024);
+    assert_eq!(parse_with_unit("-10M").unwrap(), -10_i64 * 1024 * 1024);
+    assert_eq!(
+        parse_with_unit("-10G").unwrap(),
+        -10_i64 * 1024 * 1024 * 1024
+    );
+    assert_eq!(
+        parse_with_unit("-10T").unwrap(),
+        -10_i64 * 1024 * 1024 * 1024 * 1024
+    );
+}
+
 fn parse_next_int(os: Option<&str>) -> Result<i64, Box<Error>> {
     match os {
         Some(s) => {
@@ -182,7 +228,10 @@ fn parse_transform_str(s: &str) -> Result<Transform, Box<Error>> {
 fn parse_transform_str_test() {
     assert_eq!(parse_transform_str("rate").unwrap(), Transform::Rate);
     assert_eq!(parse_transform_str("mul:8").unwrap(), Transform::Mul(8));
-    assert_eq!(parse_transform_str("div:2").unwrap(), Transform::Div(2));
+    assert_eq!(
+        parse_transform_str("div:2G").unwrap(),
+        Transform::Div(2_i64 * 1024 * 1024 * 1024)
+    );
     assert_eq!(parse_transform_str("add:-1").unwrap(), Transform::Add(-1));
     assert_eq!(parse_transform_str("sub:24").unwrap(), Transform::Sub(24));
 }

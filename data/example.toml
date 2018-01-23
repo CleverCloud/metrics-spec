@@ -12,7 +12,7 @@ y2 = [0, 102400]
 name = "Bytes In"
 selector = "kafka.BytesInPerSec{}"
 aggregate = ["sum"]
-transform = ["div:1024"]
+transform = ["div:1M"]
 axis = "y1"
 
 [groups.kafka_offset]
