@@ -57,6 +57,7 @@ impl Serialize for Range {
 
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Axis {
     Y1,
     Y2,
@@ -66,6 +67,7 @@ pub enum Axis {
 pub struct AxisRange(pub Range, pub Range);
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum AggOp {
     Sum,
     Mean,
@@ -156,6 +158,7 @@ impl Serialize for Transform {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Display {
     Stack,
     Invert,
