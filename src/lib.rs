@@ -1,8 +1,11 @@
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+extern crate serde_yaml;
+extern crate toml;
 
 use std::collections::HashMap;
+use std::error::Error;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Range(pub i32, pub i32);
@@ -67,4 +70,14 @@ pub enum Collector {
 pub struct Metrics {
     pub collect: Collector,
     pub groups:  HashMap<String, Group>,
+}
+
+pub fn parse_toml(contents: &str) -> Result<Metrics, Box<Error>> {
+    let metrics: Metrics = toml::from_str(contents)?;
+    Ok(metrics)
+}
+
+pub fn parse_yaml(contents: &str) -> Result<Metrics, Box<Error>> {
+    let metrics: Metrics = serde_yaml::from_str(&contents)?;
+    Ok(metrics)
 }
