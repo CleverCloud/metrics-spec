@@ -4,8 +4,11 @@ extern crate serde_derive;
 extern crate serde_yaml;
 extern crate toml;
 
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::collections::HashMap;
 use std::error::Error;
+use std::fmt;
+use std::str::FromStr;
 
 // ToDo not supported
 #[derive(Debug, Deserialize, Serialize)]
@@ -29,13 +32,84 @@ pub enum AggOp {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Aggregate(pub AggOp, pub Option<String>);
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug,PartialEq)]
 pub enum Transform {
     Rate,
     Mul(i32),
     Div(i32),
     Add(i32),
     Sub(i32),
+}
+
+fn parse_next_int(os: Option<&str>) -> Result<i32, Box<Error>> {
+    match os {
+        Some(s) => {
+            let n: i32 = FromStr::from_str(s)?;
+            Ok(n)
+        },
+        None => Err("Missing parameter".into())
+    }
+}
+
+fn parse_transform_str(s: &str) -> Result<Transform, Box<Error>> {
+    let mut elems = s.split(":");
+    match elems.next() {
+        Some("rate") => Ok(Transform::Rate),
+        Some("mul") => parse_next_int(elems.next()).map(Transform::Mul),
+        Some("div") => parse_next_int(elems.next()).map(Transform::Div),
+        Some("add") => parse_next_int(elems.next()).map(Transform::Add),
+        Some("sub") => parse_next_int(elems.next()).map(Transform::Sub),
+        Some(o) => Err(format!("operation {} is not supported", &o).into()),
+        _ => Err("Expected tranformation, got empty string".into()),
+    }
+}
+
+#[test]
+fn parse_transform_str_test() {
+    assert_eq!(parse_transform_str("rate").unwrap(), Transform::Rate);
+    assert_eq!(parse_transform_str("mul:8").unwrap(), Transform::Mul(8));
+    assert_eq!(parse_transform_str("div:2").unwrap(), Transform::Div(2));
+    assert_eq!(parse_transform_str("add:-1").unwrap(), Transform::Add(-1));
+    assert_eq!(parse_transform_str("sub:24").unwrap(), Transform::Sub(24));
+}
+
+impl<'de> Deserialize<'de> for Transform {
+    fn deserialize<D>(deserializer: D) -> Result<Transform, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        struct TransformVisitor;
+        impl<'de> serde::de::Visitor<'de> for TransformVisitor {
+            type Value = Transform;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("expected \"<operation>\" or \"<operation>:<value>\"")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Transform, E>
+            where
+                E: serde::de::Error,
+            {
+                parse_transform_str(value).map_err(|e| serde::de::Error::custom(e))
+            }
+        }
+        deserializer.deserialize_str(TransformVisitor)
+    }
+}
+
+impl Serialize for Transform {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let result = match self {
+            &Transform::Rate => format!("rate"),
+            &Transform::Mul(nb) => format!("mul:{}", nb),
+            &Transform::Div(nb) => format!("div:{}", nb),
+            &Transform::Add(nb) => format!("add:{}", nb),
+            &Transform::Sub(nb) => format!("sub:{}", nb),
+        };
+        serializer.serialize_str(&result)
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
