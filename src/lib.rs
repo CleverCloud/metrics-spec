@@ -62,9 +62,12 @@ pub enum Axis {
     Y1,
     Y2,
 }
-// ToDo not supported
+
 #[derive(Debug, Deserialize, Serialize)]
-pub struct AxisRange(pub Range, pub Range);
+pub struct AxisRange {
+    pub y1: Range,
+    pub y2: Range,
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
