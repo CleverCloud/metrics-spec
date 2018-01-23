@@ -69,16 +69,71 @@ pub struct AxisRange {
     pub y2: Range,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-#[serde(rename_all = "snake_case")]
+#[derive(Debug, PartialEq)]
 pub enum AggOp {
     Sum,
     Mean,
 }
 
-// ToDo not supported
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, PartialEq)]
 pub struct Aggregate(pub AggOp, pub Option<String>);
+
+fn parse_aggregate_str(s: &str) -> Result<Aggregate, Box<Error>> {
+    let mut elems = s.split(":");
+    let res_op: Result<AggOp, Box<Error>> = match elems.next() {
+        Some("sum") => Ok(AggOp::Sum),
+        Some("mean") => Ok(AggOp::Mean),
+        Some(o) => Err(format!("operation {} is not supported", &o).into()),
+        _ => Err("Expected aggregate operation, got empty string".into()),
+    };
+    let op = res_op?;
+
+    Ok(Aggregate(op, elems.next().map(|s| s.to_owned())))
+}
+
+#[test]
+fn parse_aggregate_str_test() {
+    assert_eq!(parse_aggregate_str("sum").unwrap(), Aggregate(AggOp::Sum, None));
+    assert_eq!(parse_aggregate_str("mean").unwrap(), Aggregate(AggOp::Mean, None));
+    assert_eq!(parse_aggregate_str("sum:broker").unwrap(), Aggregate(AggOp::Sum, Some("broker".into())));
+    assert_eq!(parse_aggregate_str("mean:broker").unwrap(), Aggregate(AggOp::Mean, Some("broker".into())));
+}
+
+impl<'de> Deserialize<'de> for Aggregate {
+    fn deserialize<D>(deserializer: D) -> Result<Aggregate, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        struct AggregateVisitor;
+        impl<'de> serde::de::Visitor<'de> for AggregateVisitor {
+            type Value = Aggregate;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("expected \"<operation>\" or \"<operation>:<label>\"")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Aggregate, E>
+            where
+                E: serde::de::Error,
+            {
+                parse_aggregate_str(value).map_err(|e| serde::de::Error::custom(e))
+            }
+        }
+        deserializer.deserialize_str(AggregateVisitor)
+    }
+}
+
+impl Serialize for Aggregate {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let op_str = match &self.0 {
+            &AggOp::Sum => format!("sum"),
+            &AggOp::Mean => format!("mean"),
+        };
+        serializer.serialize_str(&op_str)
+    }
+}
 
 #[derive(Debug,PartialEq)]
 pub enum Transform {
