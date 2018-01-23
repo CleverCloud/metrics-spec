@@ -183,11 +183,11 @@ pub struct Group {
     pub metrics:    Vec<Metric>,
 }
 
-// ToDo not supported
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(tag = "format", rename_all = "snake_case")]
 pub enum Collector {
-    Prometheus(String),
-    Statsd(String),
+    Prometheus { endpoint: String },
+    Statsd { endpoint: String },
     Telegraf,
 }
 

@@ -38,7 +38,9 @@ fn main() {
     };
 
     let metrics = Metrics {
-        collect: Collector::Telegraf,
+        collect: Collector::Prometheus {
+            endpoint: "http://localhost:9200".into()
+        },
         groups:  hashmap!(
             "group1".into() => group
         ),
