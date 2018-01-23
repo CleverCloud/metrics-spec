@@ -12,7 +12,7 @@ use std::fmt;
 use std::str::FromStr;
 
 #[derive(Debug)]
-pub struct Range(pub i32, pub i32);
+pub struct Range(pub i64, pub i64);
 
 impl<'de> Deserialize<'de> for Range {
     fn deserialize<D>(deserializer: D) -> Result<Range, D::Error>
@@ -149,16 +149,16 @@ impl Serialize for Aggregate {
 #[derive(Debug, PartialEq)]
 pub enum Transform {
     Rate,
-    Mul(i32),
-    Div(i32),
-    Add(i32),
-    Sub(i32),
+    Mul(i64),
+    Div(i64),
+    Add(i64),
+    Sub(i64),
 }
 
-fn parse_next_int(os: Option<&str>) -> Result<i32, Box<Error>> {
+fn parse_next_int(os: Option<&str>) -> Result<i64, Box<Error>> {
     match os {
         Some(s) => {
-            let n: i32 = FromStr::from_str(s)?;
+            let n: i64 = parse_with_unit(s)?;
             Ok(n)
         }
         None => Err("Missing parameter".into()),
