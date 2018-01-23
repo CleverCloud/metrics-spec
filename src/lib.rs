@@ -275,3 +275,13 @@ pub fn parse_yaml(contents: &str) -> Result<Metrics, Box<Error>> {
     let metrics: Metrics = serde_yaml::from_str(&contents)?;
     Ok(metrics)
 }
+
+pub fn generate_toml(metrics: &Metrics) -> Result<String, Box<Error>> {
+    let o = toml::to_string(metrics)?;
+    Ok(o)
+}
+
+pub fn generate_yaml(metrics: &Metrics) -> Result<String, Box<Error>> {
+    let o = serde_yaml::to_string(metrics)?;
+    Ok(o)
+}

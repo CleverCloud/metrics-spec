@@ -1,46 +1,56 @@
-#[macro_use]
-extern crate maplit;
 extern crate metrics_lib;
 extern crate serde_yaml;
+extern crate structopt;
+#[macro_use]
+extern crate structopt_derive;
 extern crate toml;
 
 use std::io::{self, Read};
+use std::str::FromStr;
+use structopt::StructOpt;
 
 use metrics_lib::*;
 
+#[derive(Debug)]
+enum Format {
+    TOML,
+    YAML,
+}
+
+impl FromStr for Format {
+    type Err = Box<std::error::Error>;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "t" | "toml" | "TOML" => Ok(Format::TOML),
+            "y" | "yaml" | "YAML" => Ok(Format::YAML),
+            _ => Err("unrecognized format".into()),
+        }
+    }
+}
+
+#[derive(StructOpt, Debug)]
+#[structopt(name = "metrics", about = "A tool to describe metrics semantics")]
+struct Opt {
+    #[structopt(short = "f", long = "format", help = "Input format (YAML or TOML)", default_value = "TOML")]
+    input: Format,
+
+    #[structopt(short = "o", long = "output-format", help = "Output format (YAML or TOML)", default_value = "TOML")]
+    output: Format,
+}
+
 fn main() {
+    let opt = Opt::from_args();
     let mut buffer = String::new();
     io::stdin().read_to_string(&mut buffer).unwrap();
-    //let c = parse_toml(&buffer);
-    let c = parse_yaml(&buffer);
-    println!("{:?}", &c);
 
-    let metric = Metric {
-        name:      "test".into(),
-        selector:  "test".into(),
-        axis:      Some(Axis::Y1),
-        aggregate: Some(vec![Aggregate(AggOp::Mean, None)]),
-        transform: Some(vec![Transform::Sub(20)]),
-        display:   Some(vec![Display::Stacked]),
-    };
-    let group = Group {
-        name:       "group_name".into(),
-        metrics:    vec![metric],
-        range:      Some(Range(0, 100)),
-        axis_range: None,
-    };
+    let metrics = match opt.input {
+        Format::TOML => parse_toml(&buffer),
+        Format::YAML => parse_yaml(&buffer),
+    }.expect("Couldn't parse input");
 
-    let metrics = Metrics {
-        collect: Collector::Prometheus {
-            endpoint: "http://localhost:9200".into(),
-        },
-        groups:  hashmap!(
-            "group1".into() => group
-        ),
-    };
-    let output = toml::to_string(&metrics).unwrap();
+    let output = match opt.output {
+        Format::TOML => generate_toml(&metrics),
+        Format::YAML => generate_yaml(&metrics),
+    }.expect("Couldn't generate output");
     println!("{}", &output);
-
-    let outputy = serde_yaml::to_string(&metrics).unwrap();
-    println!("{}", &outputy);
 }
