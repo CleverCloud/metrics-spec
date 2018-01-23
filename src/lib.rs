@@ -4,15 +4,58 @@ extern crate serde_derive;
 extern crate serde_yaml;
 extern crate toml;
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer};
+use serde::ser::{SerializeSeq};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 use std::str::FromStr;
 
-// ToDo not supported
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug)]
 pub struct Range(pub i32, pub i32);
+
+impl<'de> Deserialize<'de> for Range {
+    fn deserialize<D>(deserializer: D) -> Result<Range, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        struct RangeVisitor;
+        impl<'de> serde::de::Visitor<'de> for RangeVisitor {
+            type Value = Range;
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("expected a range like [0, 100]")
+            }
+
+            fn visit_seq<A>(self, mut sa: A) -> Result<Range, A::Error>
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let lo = sa.next_element()?;
+                let hi = sa.next_element()?;
+                if let (Some(l), Some(h)) = (lo, hi) {
+                    Ok(Range(l, h))
+                } else {
+                    Err(serde::de::Error::custom("Expected a range like [0, 100]"))
+                }
+            }
+        }
+        deserializer.deserialize_tuple(2, RangeVisitor)
+    }
+}
+
+impl Serialize for Range {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(2))?;
+        seq.serialize_element(&self.0)?;
+        seq.serialize_element(&self.1)?;
+        seq.end()
+    }
+}
+
+
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Axis {
     Y1,
