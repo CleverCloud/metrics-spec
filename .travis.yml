@@ -1,0 +1,20 @@
+language: rust
+sudo: false
+dist: trusty
+cache: cargo
+
+rust:
+  - nightly
+  - beta
+  - stable
+
+# install tools
+before_script:
+  - export PATH=$HOME/.cargo/bin:$PATH
+    # cargo-coveralls measures code coverage and can send it to coveralls.io
+  - which cargo-coveralls || cargo install cargo-travis
+    # rustfmt formats your code
+  - which rustfmt         || cargo install rustfmt-nightly
+
+after_success: |
+  cargo coveralls --verbose
