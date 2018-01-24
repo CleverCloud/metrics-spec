@@ -11,6 +11,7 @@ y2 = ["0", "100M"]
 [[groups.kafka_bytes.metrics]]
 name = "Bytes In"
 selector = "kafka.BytesInPerSec{}"
+unit = "MB/s"
 aggregate = ["sum"]
 transform = ["div:1M"]
 axis = "y1"

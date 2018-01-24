@@ -288,6 +288,7 @@ pub enum Display {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Metric {
     pub name:      String,
+    pub unit:      Option<String>,
     pub selector:  String,
     pub aggregate: Option<Vec<Aggregate>>,
     pub transform: Option<Vec<Transform>>,

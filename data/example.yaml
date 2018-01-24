@@ -22,6 +22,7 @@ groups:
       y2: [0, "100M"]
     metrics:
       - name: "Bytes In"
+        unit: "MB/s"
         selector: "kafka.BytesInPerSec{}"
         aggregate: [ "sum" ] 
         transform: [ "div:1M" ]
