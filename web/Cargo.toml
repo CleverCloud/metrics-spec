@@ -1,0 +1,7 @@
+[package]
+name = "metrics-web"
+version = "0.1.0"
+authors = ["Clement Delafargue <clement@delafargue.name>"]
+
+[dependencies]
+metrics_lib = { path = "../lib" }

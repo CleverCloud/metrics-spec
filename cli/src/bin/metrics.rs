@@ -1,9 +1,7 @@
 extern crate metrics_lib;
-extern crate serde_yaml;
 extern crate structopt;
 #[macro_use]
 extern crate structopt_derive;
-extern crate toml;
 
 use std::io::{self, Read};
 use std::str::FromStr;

@@ -1,0 +1,73 @@
+<!doctype html>
+
+<html>
+    <head>
+        <script>
+function newString(module, str) {
+  const utf8Encoder = new TextEncoder("UTF-8");
+  let string_buffer = utf8Encoder.encode(str)
+  let len = string_buffer.length
+  let ptr = module.alloc(len+1)
+
+  let memory = new Uint8Array(module.memory.buffer);
+  for (i = 0; i < len; i++) {
+    memory[ptr+i] = string_buffer[i]
+  }
+
+  memory[ptr+len] = 0;
+
+  return ptr;
+};
+
+var Module = {}
+var MetricsWeb = {
+    parse_toml: function(str) {
+        let buf = newString(Module, str);
+        console.log(buf);
+        let outptr = Module.parse_toml(buf);
+        console.log(outptr);
+        let result = copyCStr(Module, outptr);
+        Module.dealloc_str(buf);
+        return result;
+    }
+}
+
+fetch("./metrics-web.wasm").then(response =>
+  response.arrayBuffer()
+).then(bytes =>
+  // the Rust side needs a cos function
+  WebAssembly.instantiate(bytes)
+)
+.then(res => res.instance)
+.then(mod => {
+  console.log(mod)
+  Module.alloc   = mod.exports.alloc;
+  Module.dealloc = mod.exports.dealloc;
+  Module.parse_toml  = mod.exports.parse_toml;
+  Module.memory  = new Uint8Array(mod.exports.memory.buffer);
+
+  const form = document.getElementById("transform");
+  const input = document.getElementById("input");
+  const output = document.getElementById("output");
+
+  form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      const input_str = input.nodeValue;
+      const result = MetricsWeb.parse_toml();
+      output.innerHTML = result;
+
+  })
+});
+
+        </script>
+    </head>
+    <body>
+        <form action="#" id="transform">
+            <p>
+                <textarea name="" id="input" cols="30" rows="10"></textarea>
+                <textarea name="" id="output" disabled cols="30" rows="10"></textarea>
+                <input type="submit" value="Go"/>
+            </p>
+        </form>
+    </body>
+</html>
