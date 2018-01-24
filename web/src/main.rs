@@ -21,10 +21,17 @@ pub extern "C" fn dealloc(ptr: *mut c_void, cap: usize) {
 }
 
 #[no_mangle]
-pub extern "C" fn parse_toml(data: *mut c_char) -> *mut c_char {
+pub extern "C" fn dealloc_str(ptr: *mut c_char) {
     unsafe {
-        let data = CStr::from_ptr(data);
-        let parsed = metrics_lib::parse_toml(data.to_str().unwrap()).unwrap();
+        let _ = CString::from_raw(ptr);
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn toml_to_yaml(data: *mut c_char) -> *mut c_char {
+    unsafe {
+        let data2 = CStr::from_ptr(data).to_str().unwrap();
+        let parsed = metrics_lib::parse_toml(data2).unwrap();
         let yaml = metrics_lib::generate_yaml(&parsed).unwrap();
         let s = CString::new(yaml).unwrap();
         s.into_raw()
@@ -32,5 +39,4 @@ pub extern "C" fn parse_toml(data: *mut c_char) -> *mut c_char {
 }
 
 fn main() {
-    println!("noop");
 }
