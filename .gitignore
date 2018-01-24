@@ -1,3 +1,5 @@
 
 /target/
 **/*.rs.bk
+web/public/metrics-web.js
+web/public/metrics-web.wasm
