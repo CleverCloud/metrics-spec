@@ -1,17 +1,2 @@
-[package]
-name = "metrics"
-version = "0.1.0"
-authors = ["Clement Delafargue <clement@delafargue.name>"]
-
-[lib]
-name = "metrics_lib"
-
-[dependencies]
-maplit = "^1.0"
-regex = "^0.2"
-serde = "^1.0"
-serde_derive = "^1.0"
-serde_yaml = "^0.7"
-structopt = "0.1.0"
-structopt-derive = "0.1.0"
-toml = "^0.4"
+[workspace]
+members = ["lib", "cli", "web"]

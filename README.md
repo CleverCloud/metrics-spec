@@ -15,9 +15,30 @@ metrics --output-format yaml < data/example.toml
 - make sure you have [rustup](rustup.rs)
 - please follow <https://github.com/clevercloud/rust-guidelines>
 
-### Build
+### Build
 
 ```sh
-cargo build
+cargo build -p metrics-cli
 cargo test
+```
+
+### Webasm support
+
+You can run the parser in the browser.
+
+Make sure you have `cargo web` and that you're using nightly.
+
+```sh
+cargo install cargo-web
+rustup update
+rustup default nightly
+```
+
+Then
+
+```sh
+cd web
+cargo-web build --target wasm32-unknown-unknown
+cp ../target/wasm32-unknown-unknown/release/metrics-web.{js,wasm} public
+open public/index.html
 ```

@@ -1,0 +1,28 @@
+<!doctype html>
+
+<html>
+    <head>
+        <script src="./metrics-web.js"></script>
+        <script>
+            Rust.metrics_web.then((MetricsWeb) => {
+                var form = document.getElementById("transform");
+                var input = document.getElementById("input");
+                var output = document.getElementById("output");
+
+                form.addEventListener("submit", function(e) {
+                    e.preventDefault();
+                    output.value = MetricsWeb.toml_to_yaml(input.value);
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <form action="#" id="transform">
+            <p>
+                <textarea name="" id="input" cols="30" rows="10"></textarea>
+                <textarea name="" id="output" disabled cols="30" rows="10"></textarea>
+                <input type="submit" value="Go"/>
+            </p>
+        </form>
+    </body>
+</html>
