@@ -18,7 +18,7 @@ metrics --output-format yaml < data/example.toml
 ### Build
 
 ```sh
-cargo build -p metrics-cli
+cargo build
 cargo test
 ```
 
@@ -38,7 +38,7 @@ Then
 
 ```sh
 cd web
-cargo-web build --target wasm32-unknown-unknown
-cp ../target/wasm32-unknown-unknown/release/metrics-web.{js,wasm} public
-open public/index.html
+cargo-web build --target wasm32-unknown-unknown --release
+cp target/wasm32-unknown-unknown/release/metrics-web.{js,wasm} public
+xdg-open public/index.html
 ```
